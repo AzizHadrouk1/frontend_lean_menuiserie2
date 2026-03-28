@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Diagnostic Financier</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3248;
+      --accent: #4f8ef7;
+      --accent-dim: #1e3a6a;
+      --green: #34d399;
+      --green-dim: #0f3028;
+      --text: #e8eaf0;
+      --text-muted: #7b82a0;
+      --radius: 12px;
+      --red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* SIDEBAR */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0;
+      z-index: 10;
+    }
+    .sidebar-logo {
+      padding: 24px 20px; border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo h2 { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+    .sidebar-logo p { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .sidebar-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s; border: none; background: none;
+      width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+    .sidebar-footer {
+      padding: 16px 20px; border-top: 1px solid var(--border);
+    }
+    .btn-logout {
+      width: 100%; padding: 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: none;
+      color: var(--red); font-family: inherit; font-size: 13px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(248,113,113,0.1); }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 5;
+    }
+    .topbar-title { font-size: 16px; font-weight: 600; }
+    .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600;
+    }
+    .badge-green { background: var(--green-dim); color: var(--green); }
+    .badge-blue { background: var(--accent-dim); color: var(--accent); }
+
+    .content { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* STAT CARDS */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--text); font-family: 'DM Serif Display', serif; }
+    .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* TABLE */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-actions { display: flex; gap: 8px; }
+    .btn-sm {
+      padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text); font-family: inherit;
+      font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary {
+      background: var(--accent); border-color: var(--accent); color: white;
+    }
+    .btn-primary:hover { background: #6fa3fa; color: white; }
+
+    .responses-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .responses-table th {
+      padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border); background: var(--surface2);
+    }
+    .responses-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      vertical-align: middle; color: var(--text);
+    }
+    .responses-table tr:last-child td { border-bottom: none; }
+    .responses-table tr:hover td { background: rgba(79,142,247,0.04); }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      background: var(--surface2); color: var(--text-muted);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 200;
+      align-items: flex-start; justify-content: center;
+      padding: 40px 20px; overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; width: 100%; max-width: 820px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text-muted); cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; max-height: 80vh; overflow-y: auto; }
+    .detail-section { display: flex; flex-direction: column; gap: 12px; }
+    .detail-section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      color: var(--accent); text-transform: uppercase; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-row { display: flex; gap: 12px; }
+    .detail-label { font-size: 12px; color: var(--text-muted); min-width: 200px; flex-shrink: 0; }
+    .detail-value { font-size: 13px; color: var(--text); flex: 1; }
+    .tag {
+      display: inline-flex; padding: 2px 8px; border-radius: 4px;
+      background: var(--accent-dim); color: var(--accent); font-size: 11px;
+      font-weight: 500; margin: 2px;
+    }
+
+    /* SEARCH */
+    .search-input {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px; color: var(--text);
+      font-family: inherit; font-size: 13px; width: 220px; transition: all 0.2s;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    /* EMPTY */
+    .empty-state {
+      padding: 60px; text-align: center; color: var(--text-muted);
+    }
+    .empty-state h3 { font-size: 16px; margin-bottom: 8px; color: var(--text); }
+    .empty-state p { font-size: 13px; }
+
+    /* LOADING */
+    .loader {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 40px; color: var(--text-muted); font-size: 13px;
+    }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RATING DISPLAY */
+    .stars { color: #fbbf24; letter-spacing: 2px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>Diagnostic RAF</h2>
+      <p>Lean 4.0 — Service Financier</p>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showView('responses')">
+        📋 Réponses
+      </button>
+      <button class="nav-item" onclick="showView('stats')">
+        📊 Statistiques
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">⏏ Se déconnecter</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="viewTitle">Réponses au diagnostic</div>
+        <div class="topbar-sub" id="viewSub">Consultez les formulaires soumis</div>
+      </div>
+      <span class="badge badge-green" id="adminBadge">● Connecté</span>
+    </div>
+
+    <!-- RESPONSES VIEW -->
+    <div class="content" id="viewResponses">
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-label">Total réponses</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">formulaires reçus</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Cette semaine</div>
+          <div class="stat-value" id="statWeek">—</div>
+          <div class="stat-sub">nouvelles soumissions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dernière réponse</div>
+          <div class="stat-value" style="font-size:18px;margin-top:6px" id="statLast">—</div>
+          <div class="stat-sub">date de soumission</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Formulaires soumis</div>
+          <div class="card-actions">
+            <input type="text" class="search-input" placeholder="🔍 Rechercher..." id="searchInput" oninput="filterTable()" />
+            <button class="btn-sm btn-primary" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div id="tableContainer">
+          <div class="loader"><svg class="spin" width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2" stroke-dasharray="22 22" opacity=".4"/></svg> Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS VIEW -->
+    <div class="content" id="viewStats" style="display:none">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Analyse des réponses</div></div>
+        <div id="statsContainer" style="padding:24px">
+          <div class="loader">Chargement des statistiques...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Détail du diagnostic</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let allResponses = [];
+
+// ──────────────── AUTH CHECK ────────────────
+async function checkAuth() {
+  const token = localStorage.getItem('admin_token');
+  if (!token) { window.location.href = '/zied'; return; }
+
+  try {
+    const res = await fetch('/api/admin/responses', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/zied';
+      return;
+    }
+    const data = await res.json();
+    allResponses = data.responses || [];
+    renderTable(allResponses);
+    renderStats(allResponses);
+    updateStatCards(allResponses);
+  } catch(e) {
+    document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><h3>Erreur de connexion</h3><p>Impossible de joindre le serveur.</p></div>';
+  }
+}
+
+function updateStatCards(responses) {
+  document.getElementById('statTotal').textContent = responses.length;
+  const now = new Date();
+  const weekAgo = new Date(now - 7*24*3600*1000);
+  const thisWeek = responses.filter(r => new Date(r.submittedAt) > weekAgo).length;
+  document.getElementById('statWeek').textContent = thisWeek;
+  if (responses.length > 0) {
+    const last = responses.slice(-1)[0];
+    document.getElementById('statLast').textContent = new Date(last.submittedAt).toLocaleDateString('fr-FR');
+  } else {
+    document.getElementById('statLast').textContent = '—';
+  }
+}
+
+// ──────────────── TABLE ────────────────
+function renderTable(responses) {
+  if (!responses.length) {
+    document.getElementById('tableContainer').innerHTML = '<div class="empty-state"><h3>Aucune réponse pour le moment</h3><p>Les formulaires soumis apparaîtront ici.</p></div>';
+    return;
+  }
+  const html = `
+    <table class="responses-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Répondant</th>
+          <th>Poste</th>
+          <th>Date</th>
+          <th>ERP</th>
+          <th>Automatisation priorité</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${responses.map((r,i) => `
+          <tr>
+            <td><span class="chip">${i+1}</span></td>
+            <td><strong>${r.repondant_nom || '—'}</strong></td>
+            <td>${r.repondant_poste || '—'}</td>
+            <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('fr-FR') : '—'}</td>
+            <td><span class="chip">${formatErp(r.q11)}</span></td>
+            <td>${formatPriority(r.q38)}</td>
+            <td>
+              <button class="btn-sm" onclick="openModal('${r._id}')">👁 Voir</button>
+              <button class="btn-sm" style="color:var(--red)" onclick="deleteResponse('${r._id}')">🗑</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  document.getElementById('tableContainer').innerHTML = html;
+}
+
+function formatErp(v) {
+  const map = { erp_complet:'ERP complet', erp_partiel:'ERP partiel', logiciels_separes:'Logiciels séparés', tout_excel:'Excel uniquement' };
+  return map[v] || v || '—';
+}
+function formatPriority(v) {
+  const map = {
+    implementer_erp:'ERP', automatiser_rapprochements:'Rapprochements', former_equipe:'Formation',
+    tableaux_bord_kpis:'KPIs', formaliser_procedures:'Procédures', reduire_delais_cloture:'Clôture',
+    ameliorer_recouvrement:'Recouvrement'
+  };
+  return `<span class="tag">${map[v] || v || '—'}</span>`;
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allResponses.filter(r =>
+    (r.repondant_nom||'').toLowerCase().includes(q) ||
+    (r.repondant_poste||'').toLowerCase().includes(q)
+  );
+  renderTable(filtered);
+}
+
+// ──────────────── MODAL ────────────────
+function openModal(id) {
+  const r = allResponses.find(x => x._id === id);
+  if (!r) return;
+  document.getElementById('modalTitle').textContent = `Diagnostic — ${r.repondant_nom || 'Anonyme'}`;
+
+  const label = (key, val) => `
+    <div class="detail-row">
+      <div class="detail-label">${key}</div>
+      <div class="detail-value">${val || '<em style="color:var(--text-muted)">Non renseigné</em>'}</div>
+    </div>`;
+  const tags = (arr) => Array.isArray(arr) ? arr.map(v => `<span class="tag">${v}</span>`).join('') : (arr || '—');
+  const rating = (n) => n ? '★'.repeat(n) + '☆'.repeat(5-n) : '—';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">01 · Identification</div>
+      ${label('Répondant', r.repondant_nom)}
+      ${label('Poste', r.repondant_poste)}
+      ${label('Date de complétion', r.repondant_date)}
+      ${label('Soumis le', r.submittedAt ? new Date(r.submittedAt).toLocaleString('fr-FR') : '—')}
+      ${label('Effectif total', r.q01_total)}
+      ${label('Dont responsables', r.q01_responsables)}
+      ${label('Dont aide-comptables', r.q01_aides)}
+      ${label('Fonctions séparées (Q02)', r.q02)}
+      ${label('Organigramme officiel (Q03)', r.q03)}
+      ${label('Comptabilité (Q04)', r.q04)}
+      ${label('Précision Q04', r.q04_precision)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">02 · Tâches & Charge</div>
+      ${label('Tâches quotidiennes (Q05)', tags(r.q05))}
+      ${label('Autre quotidien', r.q05_autre)}
+      ${label('Tâches hebdo (Q06)', tags(r.q06))}
+      ${label('Tâches mensuelles (Q07)', tags(r.q07))}
+      ${label('Tâches sans valeur ajoutée (Q09)', r.q09)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">03 · Outils & Digitalisation</div>
+      ${label('Logiciels utilisés (Q10)', tags(r.q10))}
+      ${label('Précision logiciels', r.q10_precision)}
+      ${label('ERP (Q11)', r.q11)}
+      ${label('Interfaçage (Q13)', r.q13)}
+      ${label('Transit données (Q14)', r.q14)}
+      ${label('Satisfaction outils (Q15)', `<span class="stars">${rating(r.q15)}</span> ${r.q15 || ''}/5`)}
+      ${label('Limitations outils', r.q15_limitations)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">04 · Automatisation</div>
+      ${label('Double saisie (Q17)', r.q17)}
+      ${label('Tâches double saisie', r.q17_taches_double)}
+      ${label('Processus à automatiser (Q18)', r.q18_processus_prioritaires)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">05 · Documents</div>
+      ${label('Circuit validation BC (Q20)', r.q20)}
+      ${label('Détail circuit', r.q20_circuit)}
+      ${label('Transmission bons de sortie (Q21)', r.q21)}
+      ${label('Notes de frais (Q22)', r.q22)}
+      ${label('Organisation archivage (Q23)', `<span class="stars">${rating(r.q23)}</span>`)}
+      ${label('Système archivage', r.q23_archivage)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">06 · Rapprochements</div>
+      ${label('Écarts documentés (Q25)', r.q25)}
+      ${label('Écarts récurrents', r.q25_ecarts)}
+      ${label('Durée rapprochement bancaire (Q26)', r.q26)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">07 · Reporting</div>
+      ${label('Mode production rapports (Q28)', r.q28)}
+      ${label('Rapports direction (Q29)', r.q29)}
+      ${label('Format rapports', r.q29_format)}
+      ${label('KPIs définis (Q30)', r.q30)}
+      ${label('KPIs suivis', r.q30_kpis)}
+      ${label('Délai reporting mensuel (Q31)', r.q31)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">08 · Procédures & Contrôle Interne</div>
+      ${label('Manuel de procédures (Q32)', r.q32)}
+      ${label('Contrôles internes (Q34)', r.q34)}
+      ${label('Détail contrôles', r.q34_controles)}
+      ${label('Audits (Q35)', r.q35)}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">09 · Points de Douleur & Priorités</div>
+      ${label('Sources perte de temps (Q36)', r.q36_sources_perte)}
+      ${label('Risques identifiés (Q37)', r.q37_risques)}
+      ${label('Priorité amélioration (Q38)', formatPriority(r.q38))}
+      ${label('Développement priorité', r.q38_detail)}
+      ${label('Fiabilité données (Q39)', `<span class="stars">${rating(r.q39)}</span> ${r.q39 || ''}/5`)}
+      ${label('Remarques libres (Q40)', r.q40_remarques)}
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ──────────────── DELETE ────────────────
+async function deleteResponse(id) {
+  if (!confirm('Supprimer cette réponse définitivement ?')) return;
+  const token = localStorage.getItem('admin_token');
+  try {
+    const res = await fetch('/api/admin/responses/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
+      allResponses = allResponses.filter(r => r._id !== id);
+      renderTable(allResponses);
+      updateStatCards(allResponses);
+    }
+  } catch(e) { alert('Erreur lors de la suppression.'); }
+}
+
+// ──────────────── STATS VIEW ────────────────
+function renderStats(responses) {
+  if (!responses.length) {
+    document.getElementById('statsContainer').innerHTML = '<div class="empty-state"><h3>Aucune donnée disponible</h3></div>';
+    return;
+  }
+
+  const count = (field, val) => responses.filter(r => r[field] === val).length;
+  const countArr = (field, val) => responses.filter(r => Array.isArray(r[field]) && r[field].includes(val)).length;
+  const avg = (field) => {
+    const vals = responses.map(r => r[field]).filter(v => v);
+    return vals.length ? (vals.reduce((a,b) => a+b, 0)/vals.length).toFixed(1) : '—';
+  };
+
+  const bar = (n, total) => {
+    const pct = total > 0 ? Math.round((n/total)*100) : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px"></div>
+      </div>
+      <span style="font-size:12px;color:var(--text-muted);min-width:50px;text-align:right">${n} (${pct}%)</span>
+    </div>`;
+  };
+
+  const statItem = (label, val) => `<div style="margin-bottom:16px">
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">${label}</div>
+    <div style="font-size:14px;font-weight:500">${val}</div>
+  </div>`;
+
+  const total = responses.length;
+  document.getElementById('statsContainer').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:16px">ERP & Digitalisation</div>
+        ${['erp_complet','erp_partiel','logiciels_separes','tout_excel'].map(v => `
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text-muted)">${formatErp(v)}</div>
+            ${bar(count('q11',v), total)}
+          </div>
+        `).join('')}
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:16px">Priorité d'amélioration</div>
+        ${['implementer_erp','automatiser_rapprochements','former_equipe','tableaux_bord_kpis','formaliser_procedures'].map(v => `
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text-muted)">${formatErp2(v)}</div>
+            ${bar(count('q38',v), total)}
+          </div>
+        `).join('')}
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin-bottom:16px">Scores moyens</div>
+        ${statItem('Satisfaction outils (Q15)', avg('q15') + ' / 5')}
+        ${statItem('Organisation archivage (Q23)', avg('q23') + ' / 5')}
+        ${statItem('Fiabilité données (Q39)', avg('q39') + ' / 5')}
+        ${statItem('Tâches sans valeur ajoutée (Q09 — >25%)', count('q09','25_40') + count('q09','gt40') + ' sur ' + total)}
+      </div>
+    </div>
+  `;
+}
+
+function formatErp2(v) {
+  const map = {
+    implementer_erp:'Implémenter/Optimiser ERP', automatiser_rapprochements:'Automatiser rapprochements',
+    former_equipe:'Former l\'équipe', tableaux_bord_kpis:'Tableaux de bord KPIs',
+    formaliser_procedures:'Formaliser procédures', reduire_delais_cloture:'Réduire délais clôture',
+    ameliorer_recouvrement:'Améliorer recouvrement'
+  };
+  return map[v] || v;
+}
+
+// ──────────────── NAV ────────────────
+function showView(view) {
+  document.getElementById('viewResponses').style.display = view === 'responses' ? 'flex' : 'none';
+  document.getElementById('viewStats').style.display = view === 'stats' ? 'flex' : 'none';
+  document.querySelectorAll('.nav-item').forEach((btn, i) => {
+    btn.classList.toggle('active', (i === 0 && view === 'responses') || (i === 1 && view === 'stats'));
+  });
+  if (view === 'stats') {
+    document.getElementById('viewTitle').textContent = 'Statistiques & Analyse';
+    document.getElementById('viewSub').textContent = 'Vue agrégée des réponses';
+    renderStats(allResponses);
+  } else {
+    document.getElementById('viewTitle').textContent = 'Réponses au diagnostic';
+    document.getElementById('viewSub').textContent = 'Consultez les formulaires soumis';
+  }
+}
+
+// ──────────────── EXPORT CSV ────────────────
+function exportCSV() {
+  if (!allResponses.length) return alert('Aucune donnée à exporter.');
+  const headers = ['Nom','Poste','Date','ERP','Priorité','Satisfaction outils','Fiabilité données'];
+  const rows = allResponses.map(r => [
+    r.repondant_nom||'', r.repondant_poste||'', r.repondant_date||'',
+    formatErp(r.q11), formatErp2(r.q38), r.q15||'', r.q39||''
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `diagnostic_financier_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ──────────────── LOGOUT ────────────────
+function logout() {
+  localStorage.removeItem('admin_token');
+  window.location.href = '/zied';
+}
+
+checkAuth();
+</script>
+</body>
+</html>

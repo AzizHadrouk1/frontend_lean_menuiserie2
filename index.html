@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnostic Opérationnel — Service Financier & Comptable</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f2ed;
+      --surface: #ffffff;
+      --border: #e0dbd3;
+      --accent: #1a3a2e;
+      --accent-light: #2d6a4f;
+      --accent-muted: #e8f0eb;
+      --text: #1c1c1c;
+      --text-muted: #6b6860;
+      --warning: #c8842a;
+      --radius: 12px;
+      --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .hero {
+      background: var(--accent);
+      color: white;
+      padding: 60px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 0%, rgba(45,106,79,0.4) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 100%, rgba(200,132,42,0.2) 0%, transparent 50%);
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: auto; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 24px;
+      color: rgba(255,255,255,0.85);
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(28px, 5vw, 46px);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .hero h1 em { font-style: italic; color: #a8d5b5; }
+    .hero p {
+      font-size: 15px; color: rgba(255,255,255,0.72);
+      max-width: 580px; margin: 0 auto 32px; line-height: 1.7;
+    }
+    .hero-meta {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 24px;
+      font-size: 13px; color: rgba(255,255,255,0.6);
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* PROGRESS */
+    .progress-container {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .progress-inner { max-width: 760px; margin: auto; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent-light), #52b788);
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+    .sections-nav {
+      display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+    }
+    .section-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--border); transition: all 0.3s;
+      cursor: pointer;
+    }
+    .section-dot.active { background: var(--accent-light); transform: scale(1.4); }
+    .section-dot.done { background: #52b788; }
+
+    /* MAIN */
+    main { max-width: 760px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* SECTION */
+    .section-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.5s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-header {
+      background: var(--accent);
+      padding: 18px 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .section-num {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: white; flex-shrink: 0;
+    }
+    .section-title { color: white; font-size: 15px; font-weight: 600; }
+    .section-subtitle { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 2px; }
+
+    .section-body { padding: 28px 24px; display: flex; flex-direction: column; gap: 28px; }
+
+    /* QUESTION */
+    .question { display: flex; flex-direction: column; gap: 10px; }
+    .q-label {
+      font-size: 14px; font-weight: 500; color: var(--text);
+      display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
+    }
+    .q-num {
+      flex-shrink: 0;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--accent-light); background: var(--accent-muted);
+      padding: 2px 8px; border-radius: 4px; margin-top: 2px;
+    }
+    .q-hint {
+      font-size: 12px; color: var(--text-muted); margin-left: 42px;
+      font-style: italic; line-height: 1.5;
+    }
+
+    /* CHOICES */
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; margin-left: 42px; }
+    .choice-btn {
+      padding: 8px 16px; border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white; cursor: pointer;
+      font-family: inherit; font-size: 13px; color: var(--text);
+      transition: all 0.2s; line-height: 1.4;
+      text-align: left;
+    }
+    .choice-btn:hover { border-color: var(--accent-light); background: var(--accent-muted); }
+    .choice-btn.selected {
+      border-color: var(--accent-light); background: var(--accent-muted);
+      color: var(--accent); font-weight: 500;
+    }
+    .choice-btn.selected::before {
+      content: '✓ '; font-weight: 700; color: var(--accent-light);
+    }
+
+    /* TABLE CHOICES */
+    .table-wrapper { overflow-x: auto; margin-left: 0; }
+    table.q-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .q-table th {
+      background: var(--accent-muted); color: var(--accent);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+      padding: 10px 12px; text-align: center; border: 1px solid var(--border);
+    }
+    .q-table th:first-child { text-align: left; }
+    .q-table td {
+      padding: 10px 12px; border: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .q-table tr:nth-child(even) td { background: #fafaf8; }
+    .q-table td:first-child { font-size: 13px; font-weight: 500; }
+    .q-table td:not(:first-child) { text-align: center; }
+
+    .radio-cell {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--border);
+      display: inline-block; cursor: pointer;
+      position: relative; transition: all 0.2s;
+      vertical-align: middle;
+    }
+    .radio-cell.selected {
+      border-color: var(--accent-light);
+      background: var(--accent-light);
+    }
+    .radio-cell.selected::after {
+      content: '';
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 8px; height: 8px; border-radius: 50%; background: white;
+    }
+
+    /* RATING */
+    .rating-group { display: flex; align-items: center; gap: 8px; margin-left: 42px; flex-wrap: wrap; }
+    .rating-label { font-size: 12px; color: var(--text-muted); }
+    .rating-btns { display: flex; gap: 6px; }
+    .rating-btn {
+      width: 40px; height: 40px; border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .rating-btn:hover { border-color: var(--accent-light); color: var(--accent); }
+    .rating-btn.selected {
+      background: var(--accent); border-color: var(--accent); color: white;
+    }
+
+    /* TEXTAREA */
+    .q-textarea {
+      width: 100%; margin-left: 0;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; font-family: inherit; font-size: 13px;
+      color: var(--text); background: white; resize: vertical;
+      min-height: 80px; transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+    .q-textarea:focus { outline: none; border-color: var(--accent-light); }
+
+    /* TEXT INPUT */
+    .q-input-row { display: flex; gap: 12px; margin-left: 42px; flex-wrap: wrap; }
+    .q-input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    .q-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; }
+    .q-input {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-family: inherit; font-size: 14px;
+      color: var(--text); transition: border-color 0.2s; background: white;
+    }
+    .q-input:focus { outline: none; border-color: var(--accent-light); }
+
+    /* DIVIDER */
+    .q-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* SUBMIT */
+    .submit-area {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px 28px;
+      text-align: center; box-shadow: var(--shadow);
+    }
+    .submit-area h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; margin-bottom: 8px; color: var(--accent);
+    }
+    .submit-area p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+    .btn-submit {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 10px;
+      padding: 16px 36px; font-family: inherit;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: all 0.25s; letter-spacing: 0.02em;
+    }
+    .btn-submit:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,58,46,0.25); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* SUCCESS */
+    .success-screen {
+      display: none; text-align: center; padding: 60px 24px;
+    }
+    .success-icon {
+      width: 72px; height: 72px; background: var(--accent-muted);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 32px;
+    }
+    .success-screen h2 {
+      font-family: 'DM Serif Display', serif; font-size: 28px;
+      color: var(--accent); margin-bottom: 12px;
+    }
+    .success-screen p { color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #c0392b; color: white; padding: 14px 20px;
+      border-radius: 10px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s; z-index: 999; max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .section-body { padding: 20px 16px; }
+      .q-input-row { flex-direction: column; }
+      .choices { margin-left: 0; }
+      .q-hint { margin-left: 0; }
+      .rating-group { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor" opacity=".7"/><path d="M6 3.5v3l2 1.5" stroke="currentColor" stroke-linecap="round"/></svg>
+      Déploiement Lean 4.0
+    </div>
+    <h1>Diagnostic Opérationnel<br><em>Service Financier & Comptable</em></h1>
+    <p>Ce formulaire vise à cartographier les activités du service : tâches, outils, niveau d'automatisation, documents et rapports. Vos réponses permettront d'identifier les priorités de digitalisation.</p>
+    <div class="hero-meta">
+      <span>📋 40 questions</span>
+      <span>⏱ Environ 15–20 minutes</span>
+      <span>🔒 Document confidentiel — RAF</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-container">
+  <div class="progress-inner">
+    <div class="progress-label">
+      <span id="progressText">Section 1 / 9</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="sections-nav" id="sectionsNav"></div>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<main>
+  <form id="diagForm" novalidate>
+
+    <!-- ─── SECTION 01 ─── -->
+    <div class="section-block" style="animation-delay:0.1s" data-section="0">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+          <div class="section-title">Identification & Organisation du Service</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q01 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q01</span>Quel est l'effectif actuel du service financier & comptable ?</div>
+          <div class="q-hint">Inclure CDI, CDD, intérimaires, stagiaires</div>
+          <div class="q-input-row">
+            <div class="q-input-group"><label>Nombre total de personnes</label><input type="number" class="q-input" name="q01_total" min="0" placeholder="ex: 5"></div>
+            <div class="q-input-group"><label>Dont responsable(s)</label><input type="number" class="q-input" name="q01_responsables" min="0" placeholder="ex: 1"></div>
+            <div class="q-input-group"><label>Dont aide-comptable(s)</label><input type="number" class="q-input" name="q01_aides" min="0" placeholder="ex: 3"></div>
+          </div>
+        </div>
+
+        <!-- Q02 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q02</span>Les fonctions du service sont-elles clairement séparées ?</div>
+          <div class="choices" data-name="q02" data-type="single">
+            <button type="button" class="choice-btn" data-value="bien_separees">Oui, bien séparées</button>
+            <button type="button" class="choice-btn" data-value="partiellement">Partiellement</button>
+            <button type="button" class="choice-btn" data-value="une_seule">Une seule personne fait tout</button>
+            <button type="button" class="choice-btn" data-value="non_structure">Non structuré</button>
+          </div>
+        </div>
+
+        <!-- Q03 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q03</span>Existe-t-il un organigramme officiel du service avec les rôles documentés ?</div>
+          <div class="choices" data-name="q03" data-type="single">
+            <button type="button" class="choice-btn" data-value="oui_a_jour">Oui, à jour</button>
+            <button type="button" class="choice-btn" data-value="oui_obsolete">Oui, mais obsolète</button>
+            <button type="button" class="choice-btn" data-value="non">Non</button>
+            <button type="button" class="choice-btn" data-value="en_cours">En cours d'élaboration</button>
+          </div>
+        </div>
+
+        <!-- Q04 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q04</span>La comptabilité est-elle réalisée en interne ou externalisée ?</div>
+          <div class="choices" data-name="q04" data-type="single">
+            <button type="button" class="choice-btn" data-value="100_interne">100% interne</button>
+            <button type="button" class="choice-btn" data-value="mixte">Mixte interne/externe</button>
+            <button type="button" class="choice-btn" data-value="cabinet_externe">Cabinet externe uniquement</button>
+          </div>
+          <textarea class="q-textarea" name="q04_precision" placeholder="Précisez les missions externalisées si applicable..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 02 ─── -->
+    <div class="section-block" style="animation-delay:0.15s" data-section="1">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+          <div class="section-title">Tâches Quotidiennes & Charge de Travail</div>
+          <div class="section-subtitle">Cartographie des activités récurrentes</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q05 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q05</span>Quelles tâches effectuez-vous CHAQUE JOUR ? (cochez toutes celles concernées)</div>
+          <div class="choices" data-name="q05" data-type="multi">
+            <button type="button" class="choice-btn" data-value="saisie_factures_fourn">Saisie des factures fournisseurs</button>
+            <button type="button" class="choice-btn" data-value="saisie_reglements_clients">Saisie des règlements clients</button>
+            <button type="button" class="choice-btn" data-value="lettrage_pointage">Lettrage & pointage des comptes</button>
+            <button type="button" class="choice-btn" data-value="rapprochement_bancaire_quot">Rapprochement bancaire quotidien</button>
+            <button type="button" class="choice-btn" data-value="suivi_caisse">Suivi caisse / petite caisse</button>
+            <button type="button" class="choice-btn" data-value="relances_clients">Relances clients (impayés)</button>
+            <button type="button" class="choice-btn" data-value="courrier_emails">Traitement courrier/emails compta</button>
+            <button type="button" class="choice-btn" data-value="pieces_justificatives">Gestion des pièces justificatives</button>
+            <button type="button" class="choice-btn" data-value="journal_tresorerie">Mise à jour du journal de trésorerie</button>
+            <button type="button" class="choice-btn" data-value="controle_virements">Contrôle des virements émis</button>
+            <button type="button" class="choice-btn" data-value="validation_bc">Validation bons de commande</button>
+          </div>
+          <textarea class="q-textarea" name="q05_autre" placeholder="Autre tâche quotidienne non listée..." rows="2"></textarea>
+        </div>
+
+        <!-- Q06 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q06</span>Quelles sont les tâches HEBDOMADAIRES principales ?</div>
+          <div class="choices" data-name="q06" data-type="multi">
+            <button type="button" class="choice-btn" data-value="cloture_hebdo_caisse">Clôture hebdomadaire de caisse</button>
+            <button type="button" class="choice-btn" data-value="reglements_fournisseurs">Préparation des règlements fournisseurs</button>
+            <button type="button" class="choice-btn" data-value="rapport_tresorerie_hebdo">Rapport de trésorerie hebdomadaire</button>
+            <button type="button" class="choice-btn" data-value="reconciliation_comptes_clients">Réconciliation des comptes clients</button>
+            <button type="button" class="choice-btn" data-value="controle_stocks">Contrôle des stocks (valorisation)</button>
+            <button type="button" class="choice-btn" data-value="pointage_ecritures">Pointage des écritures en attente</button>
+            <button type="button" class="choice-btn" data-value="rapport_encaissement">Rapport d'encaissement</button>
+          </div>
+          <textarea class="q-textarea" name="q06_precision" placeholder="Précisez..." rows="2"></textarea>
+        </div>
+
+        <!-- Q07 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q07</span>Quelles sont les tâches MENSUELLES incontournables ?</div>
+          <div class="choices" data-name="q07" data-type="multi">
+            <button type="button" class="choice-btn" data-value="rapprochement_bancaire_mensuel">Rapprochement bancaire mensuel</button>
+            <button type="button" class="choice-btn" data-value="grand_livre_balance">Grand livre / Balance des comptes</button>
+            <button type="button" class="choice-btn" data-value="declaration_tva">Déclaration TVA</button>
+            <button type="button" class="choice-btn" data-value="charges_sociales">Calcul et paiement des charges sociales</button>
+            <button type="button" class="choice-btn" data-value="cloture_mensuelle">Clôture mensuelle des comptes</button>
+            <button type="button" class="choice-btn" data-value="reporting_financier">Reporting financier mensuel</button>
+            <button type="button" class="choice-btn" data-value="budget_vs_reel">Budget vs Réel (analyse des écarts)</button>
+            <button type="button" class="choice-btn" data-value="facturation_acomptes">Facturation des acomptes clients</button>
+            <button type="button" class="choice-btn" data-value="suivi_immobilisations">Suivi des immobilisations</button>
+            <button type="button" class="choice-btn" data-value="revision_provisions">Révision des provisions</button>
+            <button type="button" class="choice-btn" data-value="etats_financiers_inter">États financiers intermédiaires</button>
+          </div>
+          <textarea class="q-textarea" name="q07_detail" placeholder="Détaillez les tâches mensuelles critiques..." rows="2"></textarea>
+        </div>
+
+        <!-- Q08 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q08</span>Estimez le temps hebdomadaire consacré à chaque catégorie :</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Catégorie de tâche</th>
+                  <th>&lt; 2h/sem</th>
+                  <th>2–5h/sem</th>
+                  <th>5–10h/sem</th>
+                  <th>&gt; 10h/sem</th>
+                </tr>
+              </thead>
+              <tbody id="q08-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q09 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q09</span>Quelle proportion de votre temps est consacrée à des tâches sans valeur ajoutée ?</div>
+          <div class="q-hint">Ressaisies, corrections d'erreurs, recherche d'informations, attentes de validation...</div>
+          <div class="choices" data-name="q09" data-type="single">
+            <button type="button" class="choice-btn" data-value="lt10">&lt; 10%</button>
+            <button type="button" class="choice-btn" data-value="10_25">10% – 25%</button>
+            <button type="button" class="choice-btn" data-value="25_40">25% – 40%</button>
+            <button type="button" class="choice-btn" data-value="gt40">&gt; 40%</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 03 ─── -->
+    <div class="section-block" style="animation-delay:0.2s" data-section="2">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+          <div class="section-title">Outils Comptables, ERP & Niveau de Digitalisation</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q10 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q10</span>Quel(s) logiciel(s) ou outil(s) comptables sont utilisés ? (cochez tous ceux utilisés)</div>
+          <div class="choices" data-name="q10" data-type="multi">
+            <button type="button" class="choice-btn" data-value="sage_compta">SAGE (Comptabilité)</button>
+            <button type="button" class="choice-btn" data-value="sage_paie">SAGE Paie</button>
+            <button type="button" class="choice-btn" data-value="ciel">Ciel Comptabilité</button>
+            <button type="button" class="choice-btn" data-value="ebp">EBP Comptabilité</button>
+            <button type="button" class="choice-btn" data-value="odoo">Odoo (ERP)</button>
+            <button type="button" class="choice-btn" data-value="sap">SAP Business One</button>
+            <button type="button" class="choice-btn" data-value="dynamics">Microsoft Dynamics</button>
+            <button type="button" class="choice-btn" data-value="quickbooks">QuickBooks</button>
+            <button type="button" class="choice-btn" data-value="excel">Microsoft Excel (fichiers manuels)</button>
+            <button type="button" class="choice-btn" data-value="google_sheets">Google Sheets</button>
+            <button type="button" class="choice-btn" data-value="sur_mesure">Logiciel sur mesure</button>
+            <button type="button" class="choice-btn" data-value="aucun">Aucun logiciel dédié</button>
+          </div>
+          <textarea class="q-textarea" name="q10_precision" placeholder="Précisez le(s) logiciel(s) utilisé(s), version, et depuis quand..." rows="2"></textarea>
+        </div>
+
+        <!-- Q11 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q11</span>Disposez-vous d'un ERP couvrant plusieurs fonctions de l'entreprise ?</div>
+          <div class="choices" data-name="q11" data-type="single">
+            <button type="button" class="choice-btn" data-value="erp_complet">Oui, ERP complet intégré</button>
+            <button type="button" class="choice-btn" data-value="erp_partiel">Oui, mais partiel / mal paramétré</button>
+            <button type="button" class="choice-btn" data-value="logiciels_separes">Non, logiciels séparés par service</button>
+            <button type="button" class="choice-btn" data-value="tout_excel">Non, tout sur Excel</button>
+          </div>
+        </div>
+
+        <!-- Q12 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q12</span>Si ERP : quels modules sont actifs et utilisés ?</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Module ERP</th>
+                  <th>Actif & Utilisé</th>
+                  <th>Actif non utilisé</th>
+                  <th>Absent / Non paramétré</th>
+                </tr>
+              </thead>
+              <tbody id="q12-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q13 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q13</span>Le logiciel comptable est-il connecté avec les autres outils de l'entreprise ?</div>
+          <div class="q-hint">Banque, caisse, logiciel de production, CRM, e-commerce...</div>
+          <div class="choices" data-name="q13" data-type="single">
+            <button type="button" class="choice-btn" data-value="tout_interfacé">Oui, tout est interfacé</button>
+            <button type="button" class="choice-btn" data-value="partiellement">Partiellement interfacé</button>
+            <button type="button" class="choice-btn" data-value="isole">Non, tout est isolé</button>
+            <button type="button" class="choice-btn" data-value="ne_sait_pas">Ne sait pas</button>
+          </div>
+        </div>
+
+        <!-- Q14 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q14</span>Comment transitent les données entre Finance et les autres services ?</div>
+          <div class="choices" data-name="q14" data-type="single">
+            <button type="button" class="choice-btn" data-value="automatique_erp">Automatiquement via ERP/API</button>
+            <button type="button" class="choice-btn" data-value="exports_imports">Exports/imports de fichiers</button>
+            <button type="button" class="choice-btn" data-value="emails_pj">Emails avec pièces jointes</button>
+            <button type="button" class="choice-btn" data-value="saisie_manuelle">Saisie manuelle / Papier</button>
+          </div>
+        </div>
+
+        <!-- Q15 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q15</span>Niveau global de satisfaction par rapport aux outils comptables actuels :</div>
+          <div class="rating-group" data-name="q15">
+            <span class="rating-label">Très insatisfait</span>
+            <div class="rating-btns">
+              <button type="button" class="rating-btn" data-value="1">1</button>
+              <button type="button" class="rating-btn" data-value="2">2</button>
+              <button type="button" class="rating-btn" data-value="3">3</button>
+              <button type="button" class="rating-btn" data-value="4">4</button>
+              <button type="button" class="rating-btn" data-value="5">5</button>
+            </div>
+            <span class="rating-label">Très satisfait</span>
+          </div>
+          <textarea class="q-textarea" name="q15_limitations" placeholder="Principales limitations ou frustrations avec les outils actuels..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 04 ─── -->
+    <div class="section-block" style="animation-delay:0.25s" data-section="3">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <div><div class="section-title">Niveau d'Automatisation des Processus Financiers</div></div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q16 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q16</span>Pour chaque processus clé, évaluez son niveau d'automatisation :</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Processus</th>
+                  <th>Manuel (100%)</th>
+                  <th>Partiel</th>
+                  <th>Automatisé</th>
+                  <th>N/A</th>
+                </tr>
+              </thead>
+              <tbody id="q16-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q17 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q17</span>Des tâches sont-elles réalisées en double (saisie papier puis informatique) ?</div>
+          <div class="choices" data-name="q17" data-type="single">
+            <button type="button" class="choice-btn" data-value="oui_frequemment">Oui, fréquemment</button>
+            <button type="button" class="choice-btn" data-value="quelques_unes">Quelques-unes</button>
+            <button type="button" class="choice-btn" data-value="rarement">Rarement</button>
+            <button type="button" class="choice-btn" data-value="non">Non</button>
+          </div>
+          <textarea class="q-textarea" name="q17_taches_double" placeholder="Quelles tâches sont effectuées en double saisie ?" rows="2"></textarea>
+        </div>
+
+        <!-- Q18 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q18</span>Avez-vous identifié des processus à automatiser en priorité ?</div>
+          <textarea class="q-textarea" name="q18_processus_prioritaires" placeholder="Listez les processus prioritaires à automatiser (ex : rapprochement bancaire, relances, reporting...)" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 05 ─── -->
+    <div class="section-block" style="animation-delay:0.3s" data-section="4">
+      <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+          <div class="section-title">Documents d'Enregistrement & Pièces Justificatives</div>
+          <div class="section-subtitle">Bons de sortie, bons d'achat, ordres de mission...</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q19 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q19</span>Pour chaque document, précisez son mode d'existence et de traitement :</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Document</th>
+                  <th>Existe</th>
+                  <th>Manuel</th>
+                  <th>Informatisé</th>
+                  <th>Archivé papier</th>
+                  <th>Archivé num.</th>
+                </tr>
+              </thead>
+              <tbody id="q19-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q20 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q20</span>Le circuit de validation des bons de commande est-il formalisé ?</div>
+          <div class="choices" data-name="q20" data-type="single">
+            <button type="button" class="choice-btn" data-value="formalise_respecte">Oui, formalisé & respecté</button>
+            <button type="button" class="choice-btn" data-value="formalise_non_respecte">Formalisé mais non respecté</button>
+            <button type="button" class="choice-btn" data-value="informel">Informel / verbal</button>
+            <button type="button" class="choice-btn" data-value="inexistant">Inexistant</button>
+          </div>
+          <textarea class="q-textarea" name="q20_circuit" placeholder="Décrivez le circuit de validation : niveaux d'approbation, seuils, délégations de signature..." rows="3"></textarea>
+        </div>
+
+        <!-- Q21 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q21</span>Les bons de sortie matière (atelier) sont-ils transmis au service comptable régulièrement ?</div>
+          <div class="choices" data-name="q21" data-type="single">
+            <button type="button" class="choice-btn" data-value="temps_reel">Oui, en temps réel</button>
+            <button type="button" class="choice-btn" data-value="hebdomadairement">Hebdomadairement</button>
+            <button type="button" class="choice-btn" data-value="mensuellement">Mensuellement</button>
+            <button type="button" class="choice-btn" data-value="rarement">Rarement / Jamais</button>
+          </div>
+        </div>
+
+        <!-- Q22 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q22</span>Les notes de frais et ordres de mission sont-ils soumis avec justificatifs et dans les délais ?</div>
+          <div class="choices" data-name="q22" data-type="single">
+            <button type="button" class="choice-btn" data-value="oui_toujours">Oui, toujours</button>
+            <button type="button" class="choice-btn" data-value="plupart_temps">La plupart du temps</button>
+            <button type="button" class="choice-btn" data-value="souvent_retard">Souvent en retard</button>
+            <button type="button" class="choice-btn" data-value="rarement_conformes">Rarement conformes</button>
+          </div>
+        </div>
+
+        <!-- Q23 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q23</span>Les documents comptables sont-ils archivés de façon structurée et retrouvables facilement ?</div>
+          <div class="rating-group" data-name="q23">
+            <span class="rating-label">Très désorganisé</span>
+            <div class="rating-btns">
+              <button type="button" class="rating-btn" data-value="1">1</button>
+              <button type="button" class="rating-btn" data-value="2">2</button>
+              <button type="button" class="rating-btn" data-value="3">3</button>
+              <button type="button" class="rating-btn" data-value="4">4</button>
+              <button type="button" class="rating-btn" data-value="5">5</button>
+            </div>
+            <span class="rating-label">Parfaitement organisé</span>
+          </div>
+          <textarea class="q-textarea" name="q23_archivage" placeholder="Décrivez votre système d'archivage actuel (papier, numérique, outil utilisé, durée de conservation...)" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 06 ─── -->
+    <div class="section-block" style="animation-delay:0.35s" data-section="5">
+      <div class="section-header">
+        <div class="section-num">06</div>
+        <div><div class="section-title">États de Rapprochement & Contrôles Comptables</div></div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q24 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q24</span>Quels états de rapprochement sont effectués et avec quelle fréquence ?</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Type de rapprochement</th>
+                  <th>Quotidien</th>
+                  <th>Hebdo</th>
+                  <th>Mensuel</th>
+                  <th>Non réalisé</th>
+                </tr>
+              </thead>
+              <tbody id="q24-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q25 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q25</span>Les écarts détectés lors des rapprochements sont-ils documentés, analysés et résolus ?</div>
+          <div class="choices" data-name="q25" data-type="single">
+            <button type="button" class="choice-btn" data-value="systematiquement">Oui, systématiquement tracés</button>
+            <button type="button" class="choice-btn" data-value="partiellement">Documentés partiellement</button>
+            <button type="button" class="choice-btn" data-value="sans_trace">Résolus sans trace écrite</button>
+            <button type="button" class="choice-btn" data-value="rarement">Rarement analysés</button>
+          </div>
+          <textarea class="q-textarea" name="q25_ecarts" placeholder="Types d'écarts récurrents rencontrés..." rows="2"></textarea>
+        </div>
+
+        <!-- Q26 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q26</span>Combien de temps prend en moyenne un rapprochement bancaire mensuel complet ?</div>
+          <div class="choices" data-name="q26" data-type="single">
+            <button type="button" class="choice-btn" data-value="lt2h">&lt; 2 heures</button>
+            <button type="button" class="choice-btn" data-value="2_4h">2 – 4 heures</button>
+            <button type="button" class="choice-btn" data-value="4_8h">4 – 8 heures</button>
+            <button type="button" class="choice-btn" data-value="plus_journee">Plus d'une journée</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 07 ─── -->
+    <div class="section-block" style="animation-delay:0.4s" data-section="6">
+      <div class="section-header">
+        <div class="section-num">07</div>
+        <div>
+          <div class="section-title">Rapports Financiers & Reporting Direction</div>
+          <div class="section-subtitle">KPIs, tableaux de bord, comptes rendus</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q27 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q27</span>Quels rapports financiers sont produits et à quelle fréquence ?</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Rapport</th>
+                  <th>Quotidien</th>
+                  <th>Hebdo</th>
+                  <th>Mensuel</th>
+                  <th>Trimestriel</th>
+                  <th>Annuel</th>
+                  <th>Jamais</th>
+                </tr>
+              </thead>
+              <tbody id="q27-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q28 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q28</span>Ces rapports sont-ils produits automatiquement ou manuellement ?</div>
+          <div class="choices" data-name="q28" data-type="single">
+            <button type="button" class="choice-btn" data-value="automatiques">Automatiques (logiciel/ERP)</button>
+            <button type="button" class="choice-btn" data-value="semi_automatiques">Semi-automatiques</button>
+            <button type="button" class="choice-btn" data-value="manuels_excel">Manuels (Excel)</button>
+            <button type="button" class="choice-btn" data-value="pas_rapport">Pas de rapport structuré</button>
+          </div>
+        </div>
+
+        <!-- Q29 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q29</span>La Direction Générale reçoit-elle des rapports financiers réguliers ? Sous quelle forme ?</div>
+          <div class="choices" data-name="q29" data-type="single">
+            <button type="button" class="choice-btn" data-value="tableau_bord_auto">Tableau de bord automatisé</button>
+            <button type="button" class="choice-btn" data-value="rapport_word_pdf">Rapport Word/PDF mensuel</button>
+            <button type="button" class="choice-btn" data-value="presentation_ppt">Présentation PowerPoint</button>
+            <button type="button" class="choice-btn" data-value="a_la_demande">À la demande uniquement</button>
+          </div>
+          <textarea class="q-textarea" name="q29_format" placeholder="Précisez le format, la fréquence et le destinataire des rapports actuels..." rows="2"></textarea>
+        </div>
+
+        <!-- Q30 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q30</span>Existe-t-il des indicateurs de performance financiers (KPIs) formellement définis et suivis ?</div>
+          <div class="choices" data-name="q30" data-type="single">
+            <button type="button" class="choice-btn" data-value="oui_suivis">Oui, définis & suivis régulièrement</button>
+            <button type="button" class="choice-btn" data-value="quelques_informels">Quelques KPIs informels</button>
+            <button type="button" class="choice-btn" data-value="en_cours_def">En cours de définition</button>
+            <button type="button" class="choice-btn" data-value="aucun_kpi">Aucun KPI formalisé</button>
+          </div>
+          <textarea class="q-textarea" name="q30_kpis" placeholder="Listez les KPIs financiers actuellement suivis (s'il en existe)..." rows="2"></textarea>
+        </div>
+
+        <!-- Q31 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q31</span>Quel est le délai de production du reporting mensuel après la clôture du mois ?</div>
+          <div class="choices" data-name="q31" data-type="single">
+            <button type="button" class="choice-btn" data-value="j3">J+3 (3 jours après clôture)</button>
+            <button type="button" class="choice-btn" data-value="j5_j7">J+5 à J+7</button>
+            <button type="button" class="choice-btn" data-value="j10_j15">J+10 à J+15</button>
+            <button type="button" class="choice-btn" data-value="plus_15j">Plus de 15 jours</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 08 ─── -->
+    <div class="section-block" style="animation-delay:0.45s" data-section="7">
+      <div class="section-header">
+        <div class="section-num">08</div>
+        <div>
+          <div class="section-title">Manuels de Procédures & Contrôle Interne</div>
+          <div class="section-subtitle">Documentation, formalisation, conformité</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q32 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q32</span>Existe-t-il un manuel de procédures comptables et financières écrit dans votre service ?</div>
+          <div class="choices" data-name="q32" data-type="single">
+            <button type="button" class="choice-btn" data-value="oui_complet">Oui, complet & à jour</button>
+            <button type="button" class="choice-btn" data-value="oui_incomplet">Oui mais incomplet</button>
+            <button type="button" class="choice-btn" data-value="en_cours">En cours de rédaction</button>
+            <button type="button" class="choice-btn" data-value="non">Non, aucun manuel</button>
+          </div>
+        </div>
+
+        <!-- Q33 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q33</span>Pour chaque procédure clé, indiquez son niveau de formalisation :</div>
+          <div class="table-wrapper">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th>Procédure</th>
+                  <th>Formalisée écrite</th>
+                  <th>Connue oralement</th>
+                  <th>Non définie</th>
+                </tr>
+              </thead>
+              <tbody id="q33-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Q34 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q34</span>Des contrôles internes sont-ils en place pour prévenir les erreurs et fraudes ?</div>
+          <div class="q-hint">Séparation des tâches, double signature, audit interne...</div>
+          <div class="choices" data-name="q34" data-type="single">
+            <button type="button" class="choice-btn" data-value="dispositif_complet">Oui, dispositif complet</button>
+            <button type="button" class="choice-btn" data-value="controles_partiels">Contrôles partiels</button>
+            <button type="button" class="choice-btn" data-value="controles_informels">Contrôles informels</button>
+            <button type="button" class="choice-btn" data-value="aucun">Aucun contrôle structuré</button>
+          </div>
+          <textarea class="q-textarea" name="q34_controles" placeholder="Décrivez les contrôles internes existants (séparation des tâches, validations croisées, audits...)" rows="2"></textarea>
+        </div>
+
+        <!-- Q35 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q35</span>Le service est-il soumis à des audits internes ou externes réguliers ?</div>
+          <div class="choices" data-name="q35" data-type="single">
+            <button type="button" class="choice-btn" data-value="audit_annuel">Audit annuel obligatoire</button>
+            <button type="button" class="choice-btn" data-value="audit_ponctuel">Audit ponctuel</button>
+            <button type="button" class="choice-btn" data-value="controle_fiscal">Contrôle fiscal uniquement</button>
+            <button type="button" class="choice-btn" data-value="aucun_audit">Aucun audit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 09 ─── -->
+    <div class="section-block" style="animation-delay:0.5s" data-section="8">
+      <div class="section-header">
+        <div class="section-num">09</div>
+        <div><div class="section-title">Points de Douleur, Risques & Axes d'Amélioration Prioritaires</div></div>
+      </div>
+      <div class="section-body">
+
+        <!-- Q36 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q36</span>Quelles sont les 3 principales sources de perte de temps dans votre service ?</div>
+          <textarea class="q-textarea" name="q36_sources_perte" placeholder="1. ___________  2. ___________  3. ___________" rows="3"></textarea>
+        </div>
+
+        <!-- Q37 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q37</span>Quels sont les risques financiers ou comptables les plus importants actuellement non couverts ?</div>
+          <div class="q-hint">Erreurs de saisie, fraude, retards de clôture, données non fiables...</div>
+          <textarea class="q-textarea" name="q37_risques" placeholder="Décrivez les risques identifiés et leur impact potentiel..." rows="3"></textarea>
+        </div>
+
+        <!-- Q38 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q38</span>Si vous aviez à choisir UNE priorité d'amélioration pour le service financier, laquelle serait-ce ?</div>
+          <div class="choices" data-name="q38" data-type="single">
+            <button type="button" class="choice-btn" data-value="implementer_erp">Implémenter ou optimiser l'ERP</button>
+            <button type="button" class="choice-btn" data-value="automatiser_rapprochements">Automatiser les rapprochements</button>
+            <button type="button" class="choice-btn" data-value="former_equipe">Former l'équipe aux outils</button>
+            <button type="button" class="choice-btn" data-value="tableaux_bord_kpis">Créer des tableaux de bord KPIs</button>
+            <button type="button" class="choice-btn" data-value="formaliser_procedures">Formaliser les procédures</button>
+            <button type="button" class="choice-btn" data-value="reduire_delais_cloture">Réduire les délais de clôture</button>
+            <button type="button" class="choice-btn" data-value="ameliorer_recouvrement">Améliorer le recouvrement clients</button>
+          </div>
+          <textarea class="q-textarea" name="q38_detail" placeholder="Développez votre priorité..." rows="2"></textarea>
+        </div>
+
+        <!-- Q39 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q39</span>Comment évaluez-vous la fiabilité et la qualité des données financières produites par votre service ?</div>
+          <div class="rating-group" data-name="q39">
+            <span class="rating-label">Non fiables</span>
+            <div class="rating-btns">
+              <button type="button" class="rating-btn" data-value="1">1</button>
+              <button type="button" class="rating-btn" data-value="2">2</button>
+              <button type="button" class="rating-btn" data-value="3">3</button>
+              <button type="button" class="rating-btn" data-value="4">4</button>
+              <button type="button" class="rating-btn" data-value="5">5</button>
+            </div>
+            <span class="rating-label">Totalement fiables</span>
+          </div>
+        </div>
+
+        <!-- Q40 -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">Q40</span>Avez-vous des remarques, suggestions ou informations complémentaires à transmettre au RAF ?</div>
+          <textarea class="q-textarea" name="q40_remarques" placeholder="Espace libre — tout commentaire est le bienvenu..." rows="4"></textarea>
+        </div>
+
+        <!-- Signature -->
+        <div class="question">
+          <div class="q-label"><span class="q-num">INFO</span>Identification du répondant</div>
+          <div class="q-input-row">
+            <div class="q-input-group"><label>Nom & Prénom</label><input type="text" class="q-input" name="repondant_nom" placeholder="ex: Ahmed Ben Salah"></div>
+            <div class="q-input-group"><label>Poste / Fonction</label><input type="text" class="q-input" name="repondant_poste" placeholder="ex: Responsable comptable"></div>
+          </div>
+          <div class="q-input-row" style="margin-top:10px">
+            <div class="q-input-group"><label>Date de complétion</label><input type="date" class="q-input" name="repondant_date"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <h3>Merci pour votre contribution</h3>
+      <p>Ces informations permettront de construire un système de pilotage financier performant, aligné avec les objectifs Lean 4.0 de l'entreprise. Document confidentiel — RAF.</p>
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.5 4.5H15l-3.75 2.7 1.5 4.5L9 11.1l-3.75 2.6 1.5-4.5L3 6.5h4.5z" fill="currentColor"/></svg>
+        Soumettre le diagnostic
+      </button>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✅</div>
+    <h2>Diagnostic soumis avec succès !</h2>
+    <p>Votre diagnostic a bien été enregistré. Le RAF sera notifié et pourra consulter vos réponses dans l'interface d'administration. Merci pour votre contribution précieuse au programme Lean 4.0.</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ──────────────── TABLE DATA ────────────────
+const q08Rows = [
+  'Saisie comptable (factures, écritures)',
+  'Rapprochements & lettrage',
+  'Trésorerie & suivi bancaire',
+  'Rapports & reporting direction',
+  'Relances clients / Recouvrement',
+  'Gestion documents & archivage',
+  'Déclarations fiscales & sociales',
+  'Contrôle de gestion / Analyse'
+];
+const q08Cols = ['lt2h','2_5h','5_10h','gt10h'];
+const q08ColLabels = ['< 2h/sem','2–5h/sem','5–10h/sem','> 10h/sem'];
+
+const q12Rows = [
+  'Comptabilité générale','Comptabilité fournisseurs','Comptabilité clients',
+  'Trésorerie & banque','Achats & approvisionnement','Ventes & facturation',
+  'Stocks & inventaire','Immobilisations','Paie & RH','Contrôle de gestion / Budget',
+  'Reporting & tableaux de bord'
+];
+const q12Cols = ['actif_utilise','actif_non_utilise','absent'];
+
+const q16Rows = [
+  'Saisie des factures fournisseurs','Rapprochement bancaire',
+  'Génération des relances clients','Paiement fournisseurs (virement)',
+  'Calcul de la TVA à déclarer','Clôture mensuelle des comptes',
+  'Génération du bilan / compte résultat','Tableaux de bord financiers',
+  'Calcul des charges salariales','Archivage électronique des pièces'
+];
+const q16Cols = ['manuel','partiel','automatise','na'];
+
+const q19Rows = [
+  'Bon de commande (BC)','Bon de réception (BR)','Bon de sortie matière (BS)',
+  "Bon d'achat / Demande d'achat",'Ordre de mission (OM)','Note de frais',
+  'Facture fournisseur','Facture client / Devis','Avoir client / fournisseur',
+  'Ordre de virement (OV)','Reçu de caisse / Pièce de caisse',
+  "Fiche d'immobilisation","Rapport d'inventaire","Bulletin de paie"
+];
+const q19Cols = ['existe','manuel','informatise','archive_papier','archive_num'];
+
+const q24Rows = [
+  'Rapprochement bancaire (extraits / journal)',
+  'Rapprochement caisse (physique / comptable)',
+  'Lettrage des comptes clients',
+  'Lettrage des comptes fournisseurs',
+  'Rapprochement stock comptable / physique',
+  'Rapprochement interco (si plusieurs entités)',
+  'Contrôle des immobilisations',
+  'Réconciliation TVA collectée / déductible'
+];
+const q24Cols = ['quotidien','hebdo','mensuel','non_realise'];
+
+const q27Rows = [
+  'Situation de trésorerie','Balance âgée clients','Balance âgée fournisseurs',
+  'Compte de résultat','Bilan comptable','Budget vs Réalisé (écarts)',
+  'Tableau de flux de trésorerie','Coût de revient par projet',
+  'Marge brute par commande','DSO (délai moyen de paiement)',
+  'DPO (délai paiement fournisseurs)','Taux de charges / CA'
+];
+const q27Cols = ['quotidien','hebdo','mensuel','trimestriel','annuel','jamais'];
+
+const q33Rows = [
+  "Procédure d'achat et de validation des BC",
+  'Procédure de traitement des factures fournisseurs',
+  'Procédure de facturation client',
+  'Procédure de recouvrement / relances clients',
+  'Procédure de gestion de la caisse',
+  'Procédure de rapprochement bancaire',
+  'Procédure de clôture mensuelle',
+  'Procédure de gestion des notes de frais',
+  'Procédure de gestion des immobilisations',
+  'Procédure de déclaration fiscale (TVA, IS...)',
+  'Procédure de gestion de la paie',
+  "Procédure d'archivage des pièces comptables"
+];
+const q33Cols = ['formalisee_ecrite','connue_oralement','non_definie'];
+
+// State storage
+const tableState = {};
+
+function buildTableBody(tbodyId, qKey, rows, cols, colLabels, multi = false) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tableState[qKey] = {};
+  rows.forEach((row, ri) => {
+    tableState[qKey][ri] = multi ? [] : null;
+    const tr = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.textContent = row;
+    tr.appendChild(tdLabel);
+    cols.forEach((col, ci) => {
+      const td = document.createElement('td');
+      const circle = document.createElement('span');
+      circle.className = 'radio-cell';
+      circle.dataset.row = ri;
+      circle.dataset.col = col;
+      circle.addEventListener('click', () => {
+        if (multi) {
+          const arr = tableState[qKey][ri];
+          const idx = arr.indexOf(col);
+          if (idx === -1) { arr.push(col); circle.classList.add('selected'); }
+          else { arr.splice(idx,1); circle.classList.remove('selected'); }
+        } else {
+          // radio: unselect all in row
+          tbody.querySelectorAll(`[data-row="${ri}"]`).forEach(c => c.classList.remove('selected'));
+          tableState[qKey][ri] = col;
+          circle.classList.add('selected');
+        }
+        updateProgress();
+      });
+      td.appendChild(circle);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// Build all tables
+buildTableBody('q08-body','q08',q08Rows,q08Cols,q08ColLabels);
+buildTableBody('q12-body','q12',q12Rows,q12Cols,['Actif & Utilisé','Actif non utilisé','Absent / Non paramétré']);
+buildTableBody('q16-body','q16',q16Rows,q16Cols,['Manuel (100%)','Partiel','Automatisé','N/A']);
+buildTableBody('q19-body','q19',q19Rows,q19Cols,['Existe','Manuel','Informatisé','Archivé papier','Archivé num.'],true);
+buildTableBody('q24-body','q24',q24Rows,q24Cols,['Quotidien','Hebdo','Mensuel','Non réalisé']);
+buildTableBody('q27-body','q27',q27Rows,q27Cols,['Quotidien','Hebdo','Mensuel','Trimestriel','Annuel','Jamais']);
+buildTableBody('q33-body','q33',q33Rows,q33Cols,['Formalisée écrite','Connue oralement','Non définie']);
+
+// ──────────────── CHOICES ────────────────
+document.querySelectorAll('.choices').forEach(group => {
+  const type = group.dataset.type;
+  group.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (type === 'single') {
+        group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      } else {
+        btn.classList.toggle('selected');
+      }
+      updateProgress();
+    });
+  });
+});
+
+// ──────────────── RATINGS ────────────────
+document.querySelectorAll('.rating-group').forEach(group => {
+  group.querySelectorAll('.rating-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateProgress();
+    });
+  });
+});
+
+// ──────────────── PROGRESS ────────────────
+const TOTAL_KEY_QUESTIONS = 9; // Sections
+function updateProgress() {
+  const sections = document.querySelectorAll('.section-block');
+  const dots = document.querySelectorAll('.section-dot');
+  let answered = 0;
+
+  sections.forEach((sec, i) => {
+    const hasChoice = sec.querySelector('.choice-btn.selected');
+    const hasRating = sec.querySelector('.rating-btn.selected');
+    const hasInput = [...sec.querySelectorAll('.q-input')].some(inp => inp.value.trim());
+    const hasTextarea = [...sec.querySelectorAll('.q-textarea')].some(ta => ta.value.trim());
+    const isDone = hasChoice || hasRating || hasInput || hasTextarea;
+    if (isDone) {
+      answered++;
+      dots[i]?.classList.add('done');
+      dots[i]?.classList.remove('active');
+    } else {
+      dots[i]?.classList.remove('done');
+    }
+  });
+
+  const pct = Math.round((answered / sections.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressText').textContent = `Section en cours : ${answered} / ${sections.length} complétées`;
+}
+
+// Section nav dots
+const sectionsNav = document.getElementById('sectionsNav');
+document.querySelectorAll('.section-block').forEach((sec, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'section-dot';
+  dot.title = `Section ${i+1}`;
+  dot.addEventListener('click', () => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  sectionsNav.appendChild(dot);
+});
+
+// Inputs change
+document.querySelectorAll('.q-input, .q-textarea').forEach(el => {
+  el.addEventListener('input', updateProgress);
+});
+
+// ──────────────── COLLECT DATA ────────────────
+function collectFormData() {
+  const data = { submittedAt: new Date().toISOString() };
+
+  // Choices
+  document.querySelectorAll('.choices').forEach(group => {
+    const name = group.dataset.name;
+    const type = group.dataset.type;
+    const selected = [...group.querySelectorAll('.choice-btn.selected')].map(b => b.dataset.value);
+    data[name] = type === 'single' ? (selected[0] || null) : selected;
+  });
+
+  // Ratings
+  document.querySelectorAll('.rating-group').forEach(group => {
+    const name = group.dataset.name;
+    const sel = group.querySelector('.rating-btn.selected');
+    data[name] = sel ? parseInt(sel.dataset.value) : null;
+  });
+
+  // Inputs
+  document.querySelectorAll('.q-input, .q-textarea').forEach(el => {
+    if (el.name) data[el.name] = el.value.trim();
+  });
+
+  // Tables
+  Object.keys(tableState).forEach(key => {
+    data[key] = tableState[key];
+  });
+
+  return data;
+}
+
+// ──────────────── SUBMIT ────────────────
+document.getElementById('diagForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="animation:spin 1s linear infinite"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2" stroke-dasharray="22 22" opacity=".4"/></svg> Envoi en cours...';
+
+  const payload = collectFormData();
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (res.ok) {
+      document.getElementById('diagForm').style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+    } else {
+      showToast(json.message || 'Erreur lors de l\'envoi. Réessayez.');
+      btn.disabled = false;
+      btn.innerHTML = '✦ Soumettre le diagnostic';
+    }
+  } catch(err) {
+    showToast('Erreur réseau. Vérifiez votre connexion.');
+    btn.disabled = false;
+    btn.innerHTML = '✦ Soumettre le diagnostic';
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// Set today date
+const dateInput = document.querySelector('[name="repondant_date"]');
+if (dateInput) dateInput.valueAsDate = new Date();
+
+// Spin animation
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+updateProgress();
+</script>
+</body>
+</html>
