@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/zied/dashboard", "destination": "/admin.html" }
+  ],
+  "redirects": [
+    { "source": "/zied", "destination": "/login", "permanent": false }
+  ]
+}
