@@ -293,7 +293,7 @@ let allResponses = [];
 // ──────────────── AUTH CHECK ────────────────
 async function checkAuth() {
   const token = localStorage.getItem('admin_token');
-  if (!token) { window.location.href = '/zied'; return; }
+  if (!token) { window.location.href = '/login'; return; }
 
   try {
     const res = await fetch('/api/admin/responses', {
@@ -301,7 +301,7 @@ async function checkAuth() {
     });
     if (res.status === 401 || res.status === 403) {
       localStorage.removeItem('admin_token');
-      window.location.href = '/zied';
+      window.location.href = '/login';
       return;
     }
     const data = await res.json();
@@ -626,7 +626,7 @@ function exportCSV() {
 // ──────────────── LOGOUT ────────────────
 function logout() {
   localStorage.removeItem('admin_token');
-  window.location.href = '/zied';
+  window.location.href = '/login';
 }
 
 checkAuth();
