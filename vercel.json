@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://backendleanmenuiserie2-production.up.railway.app/api/:path*"
+    },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/zied/dashboard", "destination": "/admin.html" }
   ],
